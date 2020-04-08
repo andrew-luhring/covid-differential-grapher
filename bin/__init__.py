@@ -42,11 +42,9 @@ class MasterObj:
         self.dates[date][fips] = entry
 
         if fips not in self.fipses:
-            self.fipses[fips] = {}
+            self.fipses[fips] = []
 
-        if date not in self.fipses[fips]:
-            # it should be pointing to the same instance. no reason to duplicate memory
-            self.fipses[fips][date] = self.dates[date][fips]
+        self.fipses[fips].append(self.dates[date][fips])
 
         self.entries+=1
 
@@ -57,12 +55,13 @@ class MasterObj:
         return self.dates.keys()
 
 class Fips:
-    def __init__(self, state, countyname, cases, deaths, fips):
+    def __init__(self, state, countyname, cases, deaths, fips, date):
         self.state = state
         self.county = countyname
-        self.cases = cases
-        self.deaths = deaths
+        self.cases = int(cases)
+        self.deaths = int(deaths)
         self.fips = fips
+        self.date = date
 
     def toString(self):
         return f"The county {self.county} in {self.state} has {self.cases} recorded cases and {self.deaths} people have died."
@@ -79,30 +78,40 @@ def populate():
             county = row['county']
             cases = row['cases']
             deaths = row['deaths']
-            mo.addEntry(fips, date, Fips(state, county, cases, deaths, fips))
+            mo.addEntry(fips, date, Fips(state, county, cases, deaths, fips, date))
 
     return mo
 
 
-class Statistics:
-    def __init__(self, fips):
+class Statistic:
+    def __init__(self, fips, cases, deaths):
         self.fips = fips
+        self.cases = cases
+        self.deaths = deaths
+        self.case_differentials = getDiffs(self.cases)
+        self.death_differentials = getDiffs(self.deaths)
 
     # given a fips, go through each date and return an array of diffs for that place.
-def listIncreases():
-    mo = MasterObj()
-
+def getStatistics(mo):
+    # gotta be a way to not do this n^2
+    statistics = {}
     for fips in mo.fipses:
-        prevDate
+        cases_for_this_fips = []
+        deaths_for_this_fips = []
+        for date in mo.fipses[fips]:
+            cases_for_this_fips.append(date.cases)
+            deaths_for_this_fips.append(date.deaths)
 
+        # this is also an n^2 operation
+        stat = Statistic(fips, cases_for_this_fips, deaths_for_this_fips)
+        statistics[stat.fips] = stat
+    return statistics
 
+populated = populate()
+stats = getStatistics(populated)
 
-
-
-
-listIncreases()
-
-
+nyc = stats['nyc']
+print(nyc.death_differentials)
 
 import unittest
 
@@ -140,27 +149,29 @@ class TestAddEntry(unittest.TestCase):
         mo = MasterObj()
         date = '2020-01-21'
         fips = '1234'
+        fip1 = Fips('ohio', 'seneca', 4, 1, fips, date)
+        fip2 = Fips('ohio', 'seneca', 4, 1, fips, '2020-01-22')
         # 0 entries
         self.assertFalse(date in mo.dates)
         # 1 entry
 
-        mo.addEntry(fips, date, Fips('ohio', 'seneca', 4, 1, fips))
+        mo.addEntry(fips, date, fip1)
         self.assertTrue(date in mo.dates)
         # 1 fips
         self.assertTrue(fips in mo.fipses)
         # with 1 date
-        self.assertTrue(date in mo.fipses[fips])
+        self.assertTrue(fip1 in mo.fipses[fips])
 
         date2 = '2020-01-22'
-        mo.addEntry(fips, date2, Fips('ohio', 'seneca', 4, 1, fips))
+        mo.addEntry(fips, date2, fip2)
         self.assertTrue(date in mo.dates)
         self.assertTrue(date2 in mo.dates)
 
         # still 1 fips
         # self.assertTrue(len(mo.fips.keys()) == 1)
         # but that fips now has 2 dates
-        self.assertTrue(date2 in mo.fipses[fips])
-        self.assertTrue(date in mo.fipses[fips])
+        self.assertTrue(fip2 in mo.fipses[fips])
+        self.assertTrue(fip1 in mo.fipses[fips])
 
 class TestPopulate(unittest.TestCase):
     def test_same_length(self):
@@ -185,7 +196,7 @@ class TestPopulate(unittest.TestCase):
     def test_fips_structure(self):
         my_fucking_birthday_is_seriously_the_first_day_in_this_data = '2020-01-21'
         my_fucking_hometown = '39147'
-        the_day_someone_i_maybe_know_fucking_died_of_coronavirus = '2020-03-31'
+        the_day_someone_i_maybe_know_fucking_died_of_coronavirus = 0
         populate_structure = populate()
         #{fips}
         self.assertTrue(hasattr(populate_structure, 'fipses'))
@@ -193,36 +204,19 @@ class TestPopulate(unittest.TestCase):
         self.assertTrue(my_fucking_hometown in populate_structure.fipses)
         #{fips: {[my hometown]: [date someone died] : {} }}]
         seneca = populate_structure.fipses[my_fucking_hometown]
-        self.assertTrue(the_day_someone_i_maybe_know_fucking_died_of_coronavirus in populate_structure.fipses[my_fucking_hometown])
+        self.assertTrue(populate_structure.fipses[my_fucking_hometown][the_day_someone_i_maybe_know_fucking_died_of_coronavirus])
         #{fips: { [my hometown] : { [date someone died]: {deaths, cases, state, etc} }}}]
         a_weird_fucking_day = seneca[the_day_someone_i_maybe_know_fucking_died_of_coronavirus]
         self.assertTrue(hasattr(a_weird_fucking_day, 'deaths'))
 
-class TestListIncreases(unittest.TestCase):
-    def test_same_length(self):
-        increases = {
-            'fipses': {
-                '1234': {
-                    '2020-01-21': Fips('ohio', 'seneca', 4, 1, '1234'),
-                    '2020-01-22': Fips('ohio', 'seneca', 6, 1, '1234'),
-                    '2020-01-23': Fips('ohio', 'seneca', 6, 2, '1234')
-                }
-            },
-            'dates': {
-                '2020-01-21': Fips('ohio', 'seneca', 4, 1, '1234'),
-                '2020-01-22': Fips('ohio', 'seneca', 6, 1, '1234'),
-                '2020-01-23': Fips('ohio', 'seneca', 6, 2, '1234'),
-            }
-        }
-
-
-
-
-
-
-
-
-
+class TestGetStatistics(unittest.TestCase):
+    def test_diffs(self):
+        stubmo = MasterObj()
+        stubmo.addEntry('1234', '2020-01-21', Fips('ohio', 'seneca', 4, 1, '1234', '2020-01-21'))
+        stubmo.addEntry('1234', '2020-01-22', Fips('ohio', 'seneca', 6, 1, '1234', '2020-01-22'))
+        stubmo.addEntry('1234', '2020-01-23', Fips('ohio', 'seneca', 6, 2, '1234', '2020-01-23'))
+        statistics = getStatistics(stubmo)
+        self.assertEqual(statistics['1234'].case_differentials, [2, 0])
 
 
 
