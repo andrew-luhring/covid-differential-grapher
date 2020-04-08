@@ -64,13 +64,17 @@ class Fips:
         self.date = date
 
     def toString(self):
-        return f"The county {self.county} in {self.state} has {self.cases} recorded cases and {self.deaths} people have died."
+        return f"On {self.date}, the county {self.county} in {self.state} had {self.cases} recorded cases and {self.deaths} people had died up until that point."
+
+exceptions = {
+    'New York City' : 'nyc',
+    'Kansas City': 'kcm'
+}
 
 def populate():
     mo = MasterObj()
     with open(filestring, newline='') as covid_csv:
         covid_data  = csv.DictReader(covid_csv)
-
         for row in covid_data:
             date = row['date'];
             fips = row['fips']
@@ -78,6 +82,9 @@ def populate():
             county = row['county']
             cases = row['cases']
             deaths = row['deaths']
+            if county in exceptions:
+                fips = exceptions[county]
+
             mo.addEntry(fips, date, Fips(state, county, cases, deaths, fips, date))
 
     return mo
@@ -96,8 +103,8 @@ def getStatistics(mo):
     # gotta be a way to not do this n^2
     statistics = {}
     for fips in mo.fipses:
-        cases_for_this_fips = []
-        deaths_for_this_fips = []
+        cases_for_this_fips = [0]
+        deaths_for_this_fips = [0]
         for date in mo.fipses[fips]:
             cases_for_this_fips.append(date.cases)
             deaths_for_this_fips.append(date.deaths)
@@ -109,9 +116,41 @@ def getStatistics(mo):
 
 populated = populate()
 stats = getStatistics(populated)
+days_since_start = len(populated.listDates())
 
-nyc = stats['nyc']
-print(nyc.death_differentials)
+def reverse_and_sum_elements_in_arrays(master, temp):
+    for i, elem in enumerate(reversed(temp)):
+        try:
+            master[i] += elem
+        except IndexError:
+            master.append(elem)
+    return master
+
+
+def getNationalStatistics(populated_stats):
+    master = {'cases': [], 'case_differentials': [], 'deaths': [], 'death_differentials':[]}
+    # cant iterate forward because the data wont match up but if i iterate in reverse
+    # it will, because if its in this db, it will
+
+    for key in populated_stats:
+        stat = populated_stats[key]
+        master['cases'] = reverse_and_sum_elements_in_arrays(master['cases'], stat.cases)
+        master['case_differentials'] = reverse_and_sum_elements_in_arrays(master['case_differentials'], stat.case_differentials)
+        master['deaths'] = reverse_and_sum_elements_in_arrays(master['deaths'], stat.deaths)
+        master['death_differentials'] = reverse_and_sum_elements_in_arrays(master['death_differentials'], stat.death_differentials)
+
+
+    return {
+        'cases': master['cases'][::-1],
+        'case_differentials': master['case_differentials'][::-1],
+        'deaths': master['deaths'][::-1],
+        'death_differentials': master['death_differentials'][::-1]
+    }
+
+
+
+national_statistics = getNationalStatistics(stats)
+print(days_since_start)
 
 import unittest
 
@@ -120,8 +159,6 @@ def count_lines(filename):
         for i, l in enumerate(f):
             pass
         return i + 1
-
-
 
 class TestCheckDiffs(unittest.TestCase):
     def test_valid_diffs_positive(self):
@@ -216,10 +253,29 @@ class TestGetStatistics(unittest.TestCase):
         stubmo.addEntry('1234', '2020-01-22', Fips('ohio', 'seneca', 6, 1, '1234', '2020-01-22'))
         stubmo.addEntry('1234', '2020-01-23', Fips('ohio', 'seneca', 6, 2, '1234', '2020-01-23'))
         statistics = getStatistics(stubmo)
-        self.assertEqual(statistics['1234'].case_differentials, [2, 0])
+        self.assertEqual(statistics['1234'].case_differentials, [4, 2, 0])
+        self.assertEqual(statistics['1234'].death_differentials, [1, 0, 1])
 
-
-
+    def test_national_stats(self):
+        stubmo = MasterObj()
+        stubmo.addEntry('1234', '2020-01-21', Fips('ohio', 'seneca', 4, 1, '1234', '2020-01-21'))
+        stubmo.addEntry('1234', '2020-01-22', Fips('ohio', 'seneca', 6, 1, '1234', '2020-01-22'))
+        stubmo.addEntry('1234', '2020-01-23', Fips('ohio', 'seneca', 6, 2, '1234', '2020-01-23'))
+        stubmo.addEntry('666', '2020-01-22', Fips('illinois', 'chicago', 6, 1, '666', '2020-01-22'))
+        stubmo.addEntry('666', '2020-01-23', Fips('illinois', 'chicago', 6, 2, '666', '2020-01-23'))
+        statistics = getStatistics(stubmo)
+        self.assertEqual(statistics['1234'].case_differentials, [4, 2, 0])
+        self.assertEqual(statistics['666'].case_differentials, [6, 0])
+        national_stats = getNationalStatistics(statistics)
+        # self.assertEqual(national_stats.case_differentials, [4, 8, 0])
+        self.assertEqual(national_stats['cases'], [0, 4, 12, 12])
+        self.assertEqual(national_stats['case_differentials'], [4, 8, 0])
+        self.assertEqual(national_stats['deaths'], [0,1,2,4])
+        self.assertEqual(national_stats['death_differentials'], [1,1,2])
+        self.assertEqual(len(national_stats['cases']), 4)
+        self.assertEqual(len(national_stats['deaths']), len(national_stats['cases']))
+        self.assertEqual(len(national_stats['case_differentials']), 3)
+        self.assertEqual(len(national_stats['death_differentials']), len(national_stats['case_differentials']))
 
 
 
