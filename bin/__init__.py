@@ -85,6 +85,9 @@ def populate():
             if county in exceptions:
                 fips = exceptions[county]
 
+            if fips == '':
+                fips = county + ' ' + state
+
             mo.addEntry(fips, date, Fips(state, county, cases, deaths, fips, date))
 
     return mo
@@ -103,11 +106,12 @@ def getStatistics(mo):
     # gotta be a way to not do this n^2
     statistics = {}
     for fips in mo.fipses:
-        cases_for_this_fips = [0]
-        deaths_for_this_fips = [0]
-        for date in mo.fipses[fips]:
-            cases_for_this_fips.append(date.cases)
-            deaths_for_this_fips.append(date.deaths)
+        if fips != 'null' and fips != '':
+            cases_for_this_fips = [0]
+            deaths_for_this_fips = [0]
+            for date in mo.fipses[fips]:
+                cases_for_this_fips.append(date.cases)
+                deaths_for_this_fips.append(date.deaths)
 
         # this is also an n^2 operation
         stat = Statistic(fips, cases_for_this_fips, deaths_for_this_fips)
@@ -131,15 +135,17 @@ def getNationalStatistics(populated_stats):
     master = {'cases': [], 'case_differentials': [], 'deaths': [], 'death_differentials':[]}
     # cant iterate forward because the data wont match up but if i iterate in reverse
     # it will, because if its in this db, it will
-
+    # highest = 77
     for key in populated_stats:
         stat = populated_stats[key]
-        master['cases'] = reverse_and_sum_elements_in_arrays(master['cases'], stat.cases)
-        master['case_differentials'] = reverse_and_sum_elements_in_arrays(master['case_differentials'], stat.case_differentials)
-        master['deaths'] = reverse_and_sum_elements_in_arrays(master['deaths'], stat.deaths)
-        master['death_differentials'] = reverse_and_sum_elements_in_arrays(master['death_differentials'], stat.death_differentials)
+        # if len(stat.cases) <= 78:
+        reverse_and_sum_elements_in_arrays(master['cases'], stat.cases)
+        reverse_and_sum_elements_in_arrays(master['case_differentials'], stat.case_differentials)
+        reverse_and_sum_elements_in_arrays(master['deaths'], stat.deaths)
+        reverse_and_sum_elements_in_arrays(master['death_differentials'], stat.death_differentials)
 
 
+    # print(highest)
     return {
         'cases': master['cases'][::-1],
         'case_differentials': master['case_differentials'][::-1],
@@ -147,10 +153,31 @@ def getNationalStatistics(populated_stats):
         'death_differentials': master['death_differentials'][::-1]
     }
 
+def percentage_of_population(arr):
+    result = []
+    for item in arr:
+        result.append(round((item / 328200000) * 100, 5))
+
+    return result
 
 
+# print(len(stats))
 national_statistics = getNationalStatistics(stats)
-print(days_since_start)
+print('percentage of the US population who has died from covid 19:')
+print(percentage_of_population(national_statistics['deaths'])[-1])
+print('percentage of the US population who has gotten covid 19:')
+print(national_statistics['cases'][-1], 'is', percentage_of_population(national_statistics['cases'])[-1])
+# 328,200,000
+# print(percentage_of_population([3282000]))
+# print('death differentials')
+# print(national_statistics['death_differentials'])
+
+# 328.2m
+
+
+
+
+percentage_of_population(national_statistics['deaths'])
 
 import unittest
 
@@ -277,9 +304,16 @@ class TestGetStatistics(unittest.TestCase):
         self.assertEqual(len(national_stats['case_differentials']), 3)
         self.assertEqual(len(national_stats['death_differentials']), len(national_stats['case_differentials']))
 
+class TestSumArrays(unittest.TestCase):
+    def test_diffs(self):
+        result = []
+        obj = {'a': [1,1], 'b': [1,1,1], 'c': [1,1,1,1]}
+        for key in obj:
+            reverse_and_sum_elements_in_arrays(result, obj[key])
+        self.assertEqual([3,3,2,1], result)
 
-
-
+    def test_stuff(self):
+        self.assertEqual(days_since_start + 1, len(national_statistics['cases']))
 
 
 
