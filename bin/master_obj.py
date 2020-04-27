@@ -30,7 +30,8 @@ class MasterObj:
         if fips not in self.fipses:
             self.fipses[fips] = []
 
-        self.fipses[fips].append(self.dates[date][fips])
+        # self.fipses[fips].append(self.dates[date][fips])
+        self.fipses[fips].append(entry)
 
         self.entries+=1
 
