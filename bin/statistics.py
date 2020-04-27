@@ -26,13 +26,15 @@ class Statistics:
             self.fipses[stat.fips] = stat
 
             if stat.state not in self.states:
-                self.states[stat.state] = {'death_differentials': []}
+                self.states[stat.state] = {'death_differentials': [], 'case_differentials': []}
 
             Helpers.reverse_and_sum_elements_in_arrays(self.states[stat.state]['death_differentials'], stat.death_differentials)
+            Helpers.reverse_and_sum_elements_in_arrays(self.states[stat.state]['case_differentials'], stat.case_differentials)
 
 
         for state in self.states:
             self.states[state]['death_differentials'] = self.states[state]['death_differentials'][::-1]
+            self.states[state]['case_differentials'] = self.states[state]['case_differentials'][::-1]
 
         self.cases = []
         self.case_differentials = []

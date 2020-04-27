@@ -11,7 +11,8 @@ function findHighest(data){
 }
 
 
-function drawStuff(jsondata){
+function drawStuff(_jsondata){
+  const jsondata = JSON.parse(JSON.stringify(_jsondata))
   let data = [];
   let highest = findHighest(jsondata.states);
 
@@ -27,7 +28,6 @@ function drawStuff(jsondata){
     let obj = {label: statename, data: dds, borderColor: color, backgroundColor: 'rgb(255,255,255,0.0)', hidden: true}
     data.push(obj)
   }
-// Math.floor(Math.random() * 255)
 
   var ctx = document.getElementById('myChart').getContext('2d');
   let arr = new Array(99)
@@ -44,7 +44,7 @@ function drawStuff(jsondata){
         },
         scales: {
             yAxes: [{
-                stacked: true
+                stacked: false
             }],
             xAxes: [{
                 stacked: true
@@ -53,7 +53,11 @@ function drawStuff(jsondata){
 
       }
   });
-  console.log(chart)
+
+  function toggleAll(){
+    chart.data.datasets.forEach(item=> item.hidden = !item.hidden)
+  }
+  document.toggleAll = toggleAll;
 }
 
 
@@ -64,7 +68,14 @@ function drawStuff(jsondata){
     if (httpRequest.readyState === XMLHttpRequest.DONE) {
       if (httpRequest.status === 200) {
         jsondata = JSON.parse(httpRequest.responseText)
+        const ordered = {}
+        let keys = Object.keys(jsondata.states).sort();
+        keys.forEach((key)=>{
+          ordered[key] = jsondata.states[key];
+        });
+        jsondata.states = ordered;
         drawStuff(jsondata)
+        console.log(jsondata)
       }
     }
   }
