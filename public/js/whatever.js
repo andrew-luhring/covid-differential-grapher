@@ -29,13 +29,16 @@ function drawStuff(_jsondata){
     data.push(obj)
   }
 
+  data.push({label: 'national death rates', data: jsondata.death_differentials, borderColor: 'rgb(0,0,0,1)', backgroundColor: 'rgb(255,255,255,0.0)', hidden: false})
+  data.push({label: 'national deaths', data: jsondata.deaths, borderColor: 'rgb(20,20,20,1)', backgroundColor: 'rgb(255,255,255,0.0)', hidden: false})
+
   var ctx = document.getElementById('myChart').getContext('2d');
-  let arr = new Array(99)
-  arr.fill(0)
+  var labelarr = jsondata.cases.map((i, idx)=> `day ${idx}`)
+
   var chart = new Chart(ctx, {
       type: 'line',
       data: {
-          labels:arr,
+          labels:labelarr,
           datasets: data
       },
       options: {
@@ -75,7 +78,6 @@ function drawStuff(_jsondata){
         });
         jsondata.states = ordered;
         drawStuff(jsondata)
-        console.log(jsondata)
       }
     }
   }
