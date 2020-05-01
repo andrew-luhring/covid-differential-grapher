@@ -62,3 +62,9 @@ IDFK man. Are churches still open in Ohio on Sundays? The data there is from Fri
 I'm not a mathmatician, I don't care. This is just useful to me so I know when it's safe to go outside; spoiler alert: it isn't. [Stay the fuck home](https://www.youtube.com/watch?v=hNte2PlQc14)
 
 
+# Details
+One thing I noticed, and you will too if you look at new york:
+
+![](ny.png)
+
+is that for some reason on day 87 and 88 the death rate miraculously drops to zero... meaning it is the exact same from the previous day... 2 days in a row. I have no idea why that happens. It could be my data processing but I think it's more likely they either ran out of tests or there's missing data. I remember that being a thing at some point but who even really knows. I'll ask the nytimes i guess
