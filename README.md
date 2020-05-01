@@ -49,13 +49,13 @@ Here's Ohio.
 
 Case reporting has been shitty and testing people when they're alive has been kinda not consistent. Death reporting tho... that IS consistent... at least more consistent. And easier to do. So rather than worrying about how many cases there are and trying to somehow discount errorneous reporting and stuff, it makes sense to me to look at death rates rather than case rates. 
 
-Instead of tracking the death rates, which is just going to go up at varying rates over time, to me it made more sense to look at the CHANGES in death rates over time. So when you see in the graph:
+Instead of tracking the death toll, which is just going to go up at over time and look big and scary on a graph, to me it made more sense to look at the CHANGES in death RATES over time. So when you see in the graph:
 
 1,2,4,8
 
-It doesn't mean 8 deaths at the end. It means 15. We're looking at the rate of change here not the death toll.
+It doesn't mean 8 deaths at the end. It means 15. We're looking at the rate of change here not the death toll. The death rate from the first day to the second day was 1, from second to third it was 2, from third to fourth it was 4, from fourth to fifth it was 8; that's an exponential death rate increase.
 
-"But But Andy, why does the death rate spike increasingly harder every 7 days"
+"But But Andy, why does the death rate spike increasingly harder in Ohio every 7 days"
 IDFK man. Are churches still open in Ohio on Sundays? The data there is from Friday, 5.2 days before friday is sunday; the average time from first symptom to death is 14... so people who are dying on Friday showed their first symptoms 2 fridays ago, which means they were probably infected on Sunday.
 
 
