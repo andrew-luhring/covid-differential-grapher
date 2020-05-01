@@ -7,6 +7,8 @@ This is for the US only because reasons. This uses their breakdown by county/FIP
 because there are places in their data where they don't have an FIPS listed for one reason or another- where that happens
 I convert their empty data into the format "${county}(if known; most times it translates to "Unknown") ${state}".
 
+Full disclosure: I suck at python, and I haven't written code of any kind in like 2 years so don't judge me on the architecture or code quality here. Or do judge me and just know that it's pointless of you to do so.
+
 # How to install
 If you're here you prolly know the deal, but if all this is new to you, cd into the directory where you want to install this and 
 
