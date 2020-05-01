@@ -13,6 +13,7 @@ class TestGetStatistics(unittest.TestCase):
         statistics = Statistics(stubmo).fipses
         self.assertEqual(statistics['1234'].case_differentials, [4, 2, 0])
         self.assertEqual(statistics['1234'].death_differentials, [1, 0, 1])
+        self.assertEqual(sum(statistics['1234'].death_differentials), statistics['1234'].deaths[len(statistics['1234'].deaths) - 1])
 
     def test_national_stats(self):
         stubmo = MasterObj()
