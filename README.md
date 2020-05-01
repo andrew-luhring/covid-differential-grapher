@@ -45,5 +45,20 @@ Here's Ohio.
 
 ![](ohio.png)
 
+# Ya ok but what's it mean and why
+
+Case reporting has been shitty and testing people when they're alive has been kinda not consistent. Death reporting tho... that IS consistent... at least more consistent. And easier to do. So rather than worrying about how many cases there are and trying to somehow discount errorneous reporting and stuff, it makes sense to me to look at death rates rather than case rates. 
+
+Instead of tracking the death rates, which is just going to go up at varying rates over time, to me it made more sense to look at the CHANGES in death rates over time. So when you see in the graph:
+
+1,2,4,8
+
+It doesn't mean 8 deaths at the end. It means 15. We're looking at the rate of change here not the death toll.
+
+"But But Andy, why does the death rate spike increasingly harder every 7 days"
+IDFK man. Are churches still open in Ohio on Sundays? The data there is from Friday, 5.2 days before friday is sunday; the average time from first symptom to death is 14... so people who are dying on Friday showed their first symptoms 2 fridays ago, which means they were probably infected on Sunday.
+
+
+I'm not a mathmatician, I don't care. This is just useful to me so I know when it's safe to go outside; spoiler alert: it isn't. [Stay the fuck home](https://www.youtube.com/watch?v=hNte2PlQc14)
 
 
